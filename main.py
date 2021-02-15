@@ -1,4 +1,5 @@
 import os
+import sys
 
 import flask
 import telebot
@@ -135,3 +136,4 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
+    sys.stdout = open('log.txt', 'w')
