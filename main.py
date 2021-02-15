@@ -1,10 +1,11 @@
+import os
+
 import flask
 import telebot
 from dao import DBdao as db
 from models import Person, Queue
 import config
-from flask import Flask
-
+from flask import Flask, request
 
 # globals
 bot = telebot.TeleBot(config.token)
@@ -114,19 +115,18 @@ def choose(message):
         bot.send_message(message.chat.id, "Готово", reply_markup=keyboard)
 
 
-# Process webhook calls
-@app.route("/", methods=['POST'])
+@app.route("/bot", methods=['POST'])
+def get_message():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "!", 200
+
+
+@app.route("/")
 def webhook():
-    if flask.request.headers.get('content-type') == 'application/json':
-        json_string = flask.request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return ''
-    else:
-        flask.abort(403)
+    bot.remove_webhook()
+    bot.set_webhook(url=config.WEBHOOK_URL_PATH + "bot")
+    return "?", 200
 
 
 if __name__ == '__main__':
-    app.run()
-    bot.delete_webhook()
-    bot.set_webhook(config.WEBHOOK_URL_PATH)
+    app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
