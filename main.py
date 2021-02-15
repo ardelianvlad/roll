@@ -1,12 +1,16 @@
+import flask
 import telebot
 from dao import DBdao as db
 from models import Person, Queue
 import config
+from flask import Flask
 
 
 # globals
 bot = telebot.TeleBot(config.token)
 queue_id = None
+
+app = Flask(__name__)
 
 
 @bot.message_handler(commands=["roll"])
@@ -20,7 +24,7 @@ def new_queue(message):
         ranging = 0
     queue = Queue(name, ranging=ranging)
     added = db._add_queue(queue)
-    qid = queue.qid
+    qid = queue.id
     keyboard = telebot.types.InlineKeyboardMarkup()
     btn2 = telebot.types.InlineKeyboardButton(text="Додати фото", callback_data="img "+str(qid))
     keyboard.add(btn2)
@@ -110,5 +114,19 @@ def choose(message):
         bot.send_message(message.chat.id, "Готово", reply_markup=keyboard)
 
 
+# Process webhook calls
+@app.route("/", methods=['POST'])
+def webhook():
+    if flask.request.headers.get('content-type') == 'application/json':
+        json_string = flask.request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        flask.abort(403)
+
+
 if __name__ == '__main__':
-    bot.polling(none_stop=True)
+    app.run()
+    bot.delete_webhook()
+    bot.set_webhook(config.WEBHOOK_URL_PATH)

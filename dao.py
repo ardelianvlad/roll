@@ -36,7 +36,7 @@ class DBdao(object):
             conn.commit()
             c.execute("SELECT MAX(qid) FROM queue")
             qid = c.fetchone()[0]
-            queue.qid = qid
+            queue.id = qid
             conn.close()
             return True
         except Exception as ignored:
