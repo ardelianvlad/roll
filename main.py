@@ -116,7 +116,7 @@ def choose(message):
 
 
 @app.route("/bot", methods=['POST'])
-def webhook():
+def read_webhook():
     if flask.request.headers.get('content-type') == 'application/json':
         json_string = flask.request.get_data().decode('utf-8')
         update = telebot.types.Update.de_json(json_string)
