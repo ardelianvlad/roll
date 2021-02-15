@@ -35,6 +35,12 @@ def new_queue(message):
     else:
         bot.send_message(message.chat.id, "Ролл «" + queue.name + "»", reply_markup=keyboard)
 
+
+@bot.message_handler(commands=["hello"])
+def hello(message):
+    bot.send_message(message.chat.id, "Привіт")
+
+
 @bot.message_handler(commands=["list"])
 def list_rolls(message):
     queues = db.get_queues()
@@ -136,4 +142,3 @@ def webhook():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=os.environ.get('PORT', 80))
-    sys.stdout = open('log.txt', 'w')
